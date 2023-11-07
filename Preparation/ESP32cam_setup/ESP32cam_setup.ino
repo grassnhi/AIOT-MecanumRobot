@@ -95,3 +95,6 @@ void loop() {
   // Do nothing. Everything is done in another task by the web server
   delay(10000);
 }
+
+// Camera Ready! Use 'http://192.168.100.19' to connect.
+// Or use URL: 'http://192.168.100.19:81/stream' to ask for streaming in third-party app.
