@@ -1,3 +1,5 @@
-0 Đeo khẩu trang
-1 Không khẩu trang
-2 Không có người
+0 Left
+1 Right
+2 Go straight
+3 Stop
+4 Return

@@ -1,13 +1,12 @@
-#include "ESP32cam_setup.h"
+#include "ESP32cam_wifi_setup.h"
 
+// Khởi tạo đối tượng setupwifi
+Wifi_esp32 wifi_setup/*(YOUR SSID, YOUR PASSWORD)*/; //Thêm password wifi để truy cập vào wifi cá nhân, nếu không thêm hệ thống sẽ đợi smart config
+
+// Hàm chạy camera web server
 void startCameraServer();
-void setupLedFlash(int pin);
-void flashing_led(int num, int freq);
 
 void setup() {
-  //Setup flash
-  pinMode(LED_GPIO_NUM, OUTPUT);
-  flashing_led(5,50);
 
   //Setup serial and EEPROM
   Serial.begin(115200);
@@ -81,20 +80,13 @@ void setup() {
   if(config.pixel_format == PIXFORMAT_JPEG){
     s->set_framesize(s, FRAMESIZE_QVGA);
   }
-// Setup LED FLash if LED pin is defined in camera_pins.h
-#if defined(LED_GPIO_NUM)
-  setupLedFlash(LED_GPIO_NUM);
-#endif
 
   //Setup Smart Config and server
-  setupWifi();
-  flashing_led(5,50);
+  wifi_setup.setupWifi();
+  startCameraServer();
 }
 
 void loop() {
   // Do nothing. Everything is done in another task by the web server
   delay(10000);
 }
-
-// Camera Ready! Use 'http://192.168.100.19' to connect.
-// Or use URL: 'http://192.168.100.19:81/stream' to ask for streaming in third-party app.
