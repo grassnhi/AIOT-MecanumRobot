@@ -1,11 +1,16 @@
-import time
 import requests
-from PIL import Image, ImageTk, ImageOps
+import time
 from keras.models import load_model
+from PIL import Image, ImageOps
 import numpy as np
 import cv2
 import base64
 
+
+# img_url = 'http://192.168.98.215/capture'
+# img_url = 'http://192.168.100.9/capture'
+# control_url = 'http://192.168.100.9/control?ai_camera='
+# counter = 0
 model = load_model('keras_model.h5')
 
 def image_detector(counter):
@@ -54,58 +59,22 @@ def image_detector(counter):
     #client.publish("ai", data[max_index])
     return data[max_index], encoded_image, max_confidence
 
-def display_captured_image(image_path, ai_result, confidence_score):
-    image_canvas.destroy()
+#image = cv2.imread('Pics/greenland_' + str(counter) +'.png')
 
-    img = Image.open(image_path)
-    img = img.resize((300, 300))  # Adjust the size as needed
-    img = ImageTk.PhotoImage(img)
 
-    image_label.config(image=img)
-    image_label.image = img
+# counter = 0
+# while True:
+#     print("Capturing...", counter)
+#     #counter = counter + 1
+#     response = requests.get(img_url)
+#     if response.status_code:
+#         fp = open('Pics//greenland_' + str(counter) +'.png', 'wb')
+#         fp.write(response.content)
+#         fp.close()
+#         #image = cv2.imread('Pics//greenland_' + str(counter - 1) +'.png')
+#         #cv2.imshow('AI Camera', response.content)
+#         result = image_detector()
 
-    # Update AI result label
-    result_label.config(text=f"AI Result: {ai_result}")
+#         requests.get(control_url + result)
 
-    # Update confidence score label
-    score_label.config(text=f"Confidence Score: {confidence_score:.2f}")
-
-# Function to initiate the continuous processing loop
-def start_processing():
-    camera_ip = camera_ip_entry.get()
-    print("Camera IP:", camera_ip)
-    img_url = f'http://{camera_ip}/capture'
-    control_url = f'http://{camera_ip}/control?ai_camera='
-    
-    global counter_ai  # Declare counter_ai as a global variable
-    counter_ai = 5  # Initialize counter_ai here or within your application logic
-    global ai_result  # Declare ai_result as a global variable
-    ai_result = ""
-    while capture_ongoing:
-        counter_ai -= 1
-        if counter_ai <= 0:
-            counter_ai = 5
-            previous_result = ai_result
-
-            response = requests.get(img_url)
-            if response.status_code:
-                fp = open('Pics//greenland_' + str(counter_ai) + '.png', 'wb')
-                fp.write(response.content)
-                fp.close()
-
-                image_path = 'Pics//greenland_' + str(counter_ai) + '.png'
-        
-                ai_result, image, confidence_score = image_detector(counter_ai)
-
-                display_captured_image(image_path, ai_result, confidence_score)
-
-                root.update()  # Update the GUI to reflect changes
-                
-                print("AI Output: ", ai_result)
-                if previous_result != ai_result:
-                    client.publish("ai", ai_result)
-                    client.publish("image", image)
-
-                requests.get(control_url + ai_result)
-
-        time.sleep(1)
+#     time.sleep(1)
