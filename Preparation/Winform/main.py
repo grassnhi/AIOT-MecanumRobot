@@ -5,28 +5,26 @@ import random
 from mqtt_client import *
 from image_processing import *
 import requests
-from PIL import Image, ImageTk  # Import PIL for image display
+from PIL import Image, ImageTk
 
 counter = 0
 sensor_type = 0
 counter_ai = 5
 ai_result = ""
 previous_result = ""
+consecutive_high_scores = 0
 
 def display_captured_image(image_path, ai_result, confidence_score):
     image_canvas.destroy()
 
     img = Image.open(image_path)
-    img = img.resize((300, 300))  # Adjust the size as needed
+    img = img.resize((300, 300))
     img = ImageTk.PhotoImage(img)
 
     image_label.config(image=img)
     image_label.image = img
 
-    # Update AI result label
     result_label.config(text=f"AI Result: {ai_result}")
-
-    # Update confidence score label
     score_label.config(text=f"Confidence Score: {confidence_score:.2f}")
 
 # Function to initiate the continuous processing loop
@@ -36,36 +34,46 @@ def start_processing():
     img_url = f'http://{camera_ip}/capture'
     control_url = f'http://{camera_ip}/control?ai_camera='
     
-    global counter_ai  # Declare counter_ai as a global variable
-    counter_ai = 5  # Initialize counter_ai here or within your application logic
-    global ai_result  # Declare ai_result as a global variable
+    global counter_ai  
+    counter_ai = 5
+    global ai_result
     ai_result = ""
+    global previous_result, consecutive_high_scores
+    consecutive_high_scores = 3
     while capture_ongoing:
-        counter_ai -= 1
-        if counter_ai <= 0:
-            counter_ai = 5
-            previous_result = ai_result
+        # counter_ai -= 1
+        # if counter_ai <= 0:
+        #     counter_ai = 5
 
-            response = requests.get(img_url)
-            if response.status_code:
-                fp = open('Pics//greenland_' + str(counter_ai) + '.png', 'wb')
-                fp.write(response.content)
-                fp.close()
+        response = requests.get(img_url)
+        if response.status_code:
+            fp = open('Pics//greenland_' + str(counter_ai) + '.png', 'wb')
+            fp.write(response.content)
+            fp.close()
 
-                image_path = 'Pics//greenland_' + str(counter_ai) + '.png'
-        
-                ai_result, image, confidence_score = image_detector(counter_ai)
+            image_path = 'Pics//greenland_' + str(counter_ai) + '.png'
 
-                display_captured_image(image_path, ai_result, confidence_score)
+            ai_result, image, confidence_score = image_detector(counter_ai)
 
-                root.update()  # Update the GUI to reflect changes
-                
-                print("AI Output: ", ai_result)
-                if previous_result != ai_result:
+            display_captured_image(image_path, ai_result, confidence_score)
+            root.update()
+            
+            if confidence_score > 0.9:
+                if previous_result == ai_result:
+                    consecutive_high_scores -= 1
+                else:
+                    consecutive_high_scores = 3 
+
+                if consecutive_high_scores <= 0:  
+                    consecutive_high_scores = 3
+                    print("AI Output: ", ai_result)
+                    print("AI Score: ", confidence_score)
+
                     client.publish("ai", ai_result)
                     client.publish("image", image)
 
-                requests.get(control_url + ai_result)
+            previous_result = ai_result
+            requests.get(control_url + ai_result)
 
         time.sleep(1)
 
@@ -90,7 +98,7 @@ image_canvas = tk.Canvas(root, width=300, height=300, bg="#CCE5FF")
 image_canvas.place(x=20, y=20)
 
 # Buttons for car control
-button_width = 9  # Define the width for all buttons
+button_width = 9
 
 right_button = tk.Button(root, text="Right", width=button_width, bg="#FFC08D")
 right_button.place(x=495, y=145)
@@ -102,13 +110,52 @@ down_button = tk.Button(root, text="Down", width=button_width, bg="#FFC08D")
 down_button.place(x=422, y=145)
 return_button = tk.Button(root, text="Return", width=button_width, bg="#FFC08D")
 return_button.place(x=422, y=170)
-auto_button = tk.Button(root, text="Automatic Run", width=30, bg="#FFC08D")
+auto_button = tk.Button(root, text="Automatic Run", width=20, bg="#FFC08D")
 auto_button.place(x=349, y=200)
+stop_button = tk.Button(root, text="Stop", width=button_width, bg="#FFC08D")
+stop_button.place(x=495, y=200)
+
+def move_right():
+    client.publish("car", "right")
+    print("Right button pressed")
+
+def move_left():
+    client.publish("car", "left")
+    print("Left button pressed")
+
+def move_up():
+    client.publish("car", "up")
+    print("Up button pressed")
+
+def move_down():
+    client.publish("car", "down")
+    print("Down button pressed")
+
+def return_position():
+    client.publish("car", "return")
+    print("Return button pressed")
+
+def automatic_run():
+    client.publish("car", "automatic_run")
+    print("Automatic button pressed")
+
+def stop_car():
+    client.publish("car", "stop")
+    print("Stop button pressed")
+
+# Update button commands to call the respective functions
+right_button.config(command=move_right)
+left_button.config(command=move_left)
+up_button.config(command=move_up)
+down_button.config(command=move_down)
+return_button.config(command=return_position)
+auto_button.config(command=automatic_run)
+stop_button.config(command=stop_car)
 
 # Labels to display AI result and confidence score
-frame = tk.Frame(root, width=220, height=25, bg="#7CDBAF", bd=2, relief=tk.GROOVE)  # Kích thước lớn hơn
+frame = tk.Frame(root, width=220, height=25, bg="#7CDBAF", bd=2, relief=tk.GROOVE)  
 frame.place(x=350, y=275)
-frame = tk.Frame(root, width=220, height=25, bg="#7CDBAF", bd=2, relief=tk.GROOVE)  # Kích thước lớn hơn
+frame = tk.Frame(root, width=220, height=25, bg="#7CDBAF", bd=2, relief=tk.GROOVE)
 frame.place(x=350, y=298)
 
 result_label = tk.Label(root, text="AI Result: ", bg="#7CDBAF")
@@ -142,8 +189,5 @@ camera_ip_label.place(x=350, y=20)
 camera_ip_entry = tk.Entry(root, bg="#7CDBAF", font=('Arial', 12), width=17)
 camera_ip_entry.place(x=415, y=20)
 
-# Change background color
 root.configure(bg='#CCE5FF') 
-
-# Run the GUI main loop
 root.mainloop()
