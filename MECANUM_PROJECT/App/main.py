@@ -40,6 +40,7 @@ def start_processing():
     ai_result = ""
     global previous_result, consecutive_high_scores
     consecutive_high_scores = 3
+    result_published = False
     while capture_ongoing:
         # counter_ai -= 1
         # if counter_ai <= 0:
@@ -57,21 +58,24 @@ def start_processing():
 
             display_captured_image(image_path, ai_result, confidence_score)
             root.update()
-            
+
             if confidence_score > 0.9:
-                if previous_result == ai_result:
-                    consecutive_high_scores -= 1
+                if ai_result == previous_result:
+                    consecutive_high_scores += 1
                 else:
-                    consecutive_high_scores = 3 
+                    consecutive_high_scores = 1 
+                    result_published = False
 
-                if consecutive_high_scores <= 0:  
-                    consecutive_high_scores = 3
-                    print("AI Output: ", ai_result)
-                    print("AI Score: ", confidence_score)
+            if consecutive_high_scores >= 3 and not result_published:
+                print("AI Output: ", ai_result)
+                print("AI Score: ", confidence_score)
 
-                    client.publish("ai", ai_result)
-                    client.publish("image", image)
-                    client.publish("score", str(confidence_score))
+                client.publish("ai", ai_result)
+                client.publish("image", image)
+                client.publish("score", str(confidence_score))
+
+                result_published = True  
+                consecutive_high_scores = 0 
 
             previous_result = ai_result
             requests.get(control_url + ai_result)
@@ -81,6 +85,7 @@ def start_processing():
 # Tkinter GUI setup
 root = tk.Tk()
 root.title("AI Image Processing")
+root.iconbitmap('icon.ico')
 
 window_width = 600
 window_height = 400
