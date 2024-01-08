@@ -71,6 +71,7 @@ def start_processing():
 
                     client.publish("ai", ai_result)
                     client.publish("image", image)
+                    client.publish("score", str(confidence_score))
 
             previous_result = ai_result
             requests.get(control_url + ai_result)

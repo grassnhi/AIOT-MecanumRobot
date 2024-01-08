@@ -1,5 +1,6 @@
-0 Left
-1 Right
-2 Go straight
-3 Stop
-4 Return
+0 straight
+1 left
+2 right
+3 return
+4 stop
+5 background
