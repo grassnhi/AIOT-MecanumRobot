@@ -6,7 +6,7 @@ from mqtt_client import *
 from image_processing import *
 import requests
 from PIL import Image, ImageTk
-
+# 192.168.160.18
 counter = 0
 sensor_type = 0
 counter_ai = 5
@@ -59,7 +59,13 @@ def start_processing():
             display_captured_image(image_path, ai_result, confidence_score)
             root.update()
 
-            if confidence_score > 0.9:
+            # if ai_result == 'background':
+            #     client.publish("ai", ai_result)
+            #     client.publish("image", image)
+            #     client.publish("score", str(confidence_score))
+
+
+            if confidence_score > 0.8:
                 if ai_result == previous_result:
                     consecutive_high_scores += 1
                 else:
@@ -116,37 +122,38 @@ down_button = tk.Button(root, text="Down", width=button_width, bg="#FFC08D")
 down_button.place(x=422, y=145)
 return_button = tk.Button(root, text="Return", width=button_width, bg="#FFC08D")
 return_button.place(x=422, y=170)
-auto_button = tk.Button(root, text="Automatic Run", width=20, bg="#FFC08D")
+auto_button = tk.Button(root, text="Automatic", width=20, bg="#FFC08D")
 auto_button.place(x=349, y=200)
 stop_button = tk.Button(root, text="Stop", width=button_width, bg="#FFC08D")
 stop_button.place(x=495, y=200)
 
 def move_right():
-    client.publish("car", "right")
+    client.publish("ai", "right")
     print("Right button pressed")
 
 def move_left():
-    client.publish("car", "left")
+    client.publish("ai", "left")
     print("Left button pressed")
 
 def move_up():
-    client.publish("car", "up")
+    client.publish("ai", "straight")
     print("Up button pressed")
 
 def move_down():
-    client.publish("car", "down")
+    client.publish("ai", "down")
     print("Down button pressed")
 
 def return_position():
-    client.publish("car", "return")
+    client.publish("ai", "return")
     print("Return button pressed")
 
 def automatic_run():
-    client.publish("car", "automatic_run")
-    print("Automatic button pressed")
+    toggle_capture()
+    client.publish("ai", "automatic")
+    print("Automatic pressed")
 
 def stop_car():
-    client.publish("car", "stop")
+    client.publish("ai", "stop")
     print("Stop button pressed")
 
 # Update button commands to call the respective functions
