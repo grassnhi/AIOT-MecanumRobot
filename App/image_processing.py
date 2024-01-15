@@ -58,23 +58,3 @@ def image_detector(counter):
     print("AI Result: ", data[max_index])
     #client.publish("ai", data[max_index])
     return data[max_index], encoded_image, max_confidence
-
-#image = cv2.imread('Pics/greenland_' + str(counter) +'.png')
-
-
-# counter = 0
-# while True:
-#     print("Capturing...", counter)
-#     #counter = counter + 1
-#     response = requests.get(img_url)
-#     if response.status_code:
-#         fp = open('Pics//greenland_' + str(counter) +'.png', 'wb')
-#         fp.write(response.content)
-#         fp.close()
-#         #image = cv2.imread('Pics//greenland_' + str(counter - 1) +'.png')
-#         #cv2.imshow('AI Camera', response.content)
-#         result = image_detector()
-
-#         requests.get(control_url + result)
-
-#     time.sleep(1)

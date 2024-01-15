@@ -3,7 +3,7 @@ import sys
 
 AIO_FEED_IDs = ["nutnhan1", "nutnhan2"]
 AIO_USERNAME = "grassnhi"
-AIO_KEY = "aio_Qdcw73nRrILP3plgwjv1P0ALOuQu"
+AIO_KEY = "aio_qLEp03E3RdHLM4IRr1suHP9BeXtc"
 
 def connected(client):
     print("Ket noi thanh cong ...")

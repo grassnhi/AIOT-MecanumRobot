@@ -18,7 +18,7 @@ sensor_type = 0
 counter_ai = 5
 ai_result = ""
 previous_result = ""
-consecutive_high_scores = 0
+consecutive_scores = 0
 
 def display_captured_image(image_path, ai_result, confidence_score):
     image_canvas.destroy()
@@ -44,8 +44,8 @@ def start_processing():
     counter_ai = 5
     global ai_result
     ai_result = ""
-    global previous_result, consecutive_high_scores
-    consecutive_high_scores = 3
+    global previous_result, consecutive_scores
+    consecutive_scores = 3
     result_published = False
     while capture_ongoing:
         # counter_ai -= 1
@@ -67,12 +67,12 @@ def start_processing():
 
             if confidence_score > 0.8:
                 if ai_result == previous_result:
-                    consecutive_high_scores += 1
+                    consecutive_scores += 1
                 else:
-                    consecutive_high_scores = 1 
+                    consecutive_scores = 1 
                     result_published = False
 
-            if consecutive_high_scores >= 3 and not result_published:
+            if consecutive_scores >= 3 and not result_published:
                 print("AI Output: ", ai_result)
                 print("AI Score: ", confidence_score)
 
@@ -81,7 +81,7 @@ def start_processing():
                 client.publish("score", str(confidence_score))
 
                 result_published = True  
-                consecutive_high_scores = 0 
+                consecutive_scores = 0 
 
             previous_result = ai_result
             requests.get(control_url + ai_result)
@@ -90,7 +90,7 @@ def start_processing():
 
 # Tkinter GUI setup
 root = tk.Tk()
-root.title("AI Image Processing")
+root.title("AIOT Mecanum App")
 root.iconbitmap('icon.ico')
 
 window_width = 1020
@@ -187,10 +187,29 @@ def return_position():
     client.publish("ai", "return")
     print("Return button pressed")
 
+# def automatic_run():
+#     toggle_capture()
+#     client.publish("ai", "automatic")
+#     print("Automatic pressed")
+    
+auto_button_pressed = False 
+
 def automatic_run():
-    toggle_capture()
-    client.publish("ai", "automatic")
-    print("Automatic pressed")
+    global auto_button_pressed
+
+    if auto_button_pressed:
+        auto_button.config(text="Automatic")
+        auto_button_pressed = False
+        client.publish("ai", "automatic")
+        print("Automatic mode activated")
+        toggle_capture()
+    else:
+        auto_button.config(text="Manual")
+        auto_button_pressed = True
+        client.publish("ai", "manual")
+        print("Manual mode activated")
+        toggle_capture()
+
 
 def stop_car():
     client.publish("ai", "stop")
@@ -256,13 +275,17 @@ capture_button.place(x=50, y=520)
 capture_ongoing = False 
 
 def toggle_capture():
-    global capture_ongoing
+    global capture_ongoing, auto_button_pressed
     if capture_ongoing:
         capture_ongoing = False
+        auto_button_pressed = True
         capture_button.config(text="Start Capturing")
+        auto_button.config(text="Automatic")
     else:
         capture_ongoing = True
+        auto_button_pressed = False
         capture_button.config(text="End Capturing")
+        auto_button.config(text="Manual")
         start_processing()
 
 capture_button.config(command=toggle_capture, bg=button_bg_color, fg=button_fg_color, highlightbackground=button_highlight_color)
