@@ -168,24 +168,30 @@ stop_button.bind("<Enter>", on_enter)
 stop_button.bind("<Leave>", on_leave)
 
 def move_right():
-    client.publish("ai", "right")
-    print("Right button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "right")
+        print("Right button pressed")
 
 def move_left():
-    client.publish("ai", "left")
-    print("Left button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "left")
+        print("Left button pressed")
 
 def move_up():
-    client.publish("ai", "straight")
-    print("Up button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "straight")
+        print("Up button pressed")
 
 def move_down():
-    client.publish("ai", "down")
-    print("Down button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "down")
+        print("Down button pressed")
+
 
 def return_position():
-    client.publish("ai", "return")
-    print("Return button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "return")
+        print("Return button pressed")
 
 # def automatic_run():
 #     toggle_capture()
@@ -200,20 +206,21 @@ def automatic_run():
     if auto_button_pressed:
         auto_button.config(text="Automatic")
         auto_button_pressed = False
-        client.publish("ai", "automatic")
+        # client.publish("ai", "automatic")
         print("Automatic mode activated")
         toggle_capture()
     else:
         auto_button.config(text="Manual")
         auto_button_pressed = True
-        client.publish("ai", "manual")
+        # client.publish("ai", "manual")
         print("Manual mode activated")
         toggle_capture()
 
 
 def stop_car():
-    client.publish("ai", "stop")
-    print("Stop button pressed")
+    if auto_button_pressed:
+        client.publish("ai", "stop")
+        print("Stop button pressed")
 
 # Update button commands to call the respective functions
 right_button.config(command=move_right)
